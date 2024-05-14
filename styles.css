@@ -27,8 +27,8 @@ main {
 }
 
 h1 {
-  font-size: 2em;
-  margin-bottom: 20px;
+  font-size: 3em;
+  margin-bottom: 50px;
 }
 
 .color-palette {
@@ -54,4 +54,18 @@ h1 {
   margin-top: 5px;
   font-size: 0.9em;
   text-align: center;
+}
+
+.button-box {
+  margin-top: 50px;
+}
+
+.palette-button {
+  font-size: 1.2em;
+    color: #ffffff;
+    background: #000000;
+    font-weight: 200;
+    border-bottom-left-radius: 100px;
+    border-top-right-radius: 100px;
+    padding: 3px 40px;
 }
