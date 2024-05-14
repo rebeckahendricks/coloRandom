@@ -42,6 +42,7 @@ h1 {
   flex-direction: column;
   align-items: center;
   width: 100px;
+  position: relative;
 }
 
 .color {
@@ -62,10 +63,40 @@ h1 {
 
 .palette-button {
   font-size: 1.2em;
-    color: #ffffff;
-    background: #000000;
-    font-weight: 200;
-    border-bottom-left-radius: 100px;
-    border-top-right-radius: 100px;
-    padding: 3px 40px;
+  color: #ffffff;
+  background: #000000;
+  font-weight: 200;
+  border-bottom-left-radius: 100px;
+  border-top-right-radius: 100px;
+  padding: 3px 40px;
+}
+
+.lock-button {
+  position: absolute;
+  bottom: 25px;
+  right: 0px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.lock-button:focus,
+.favorite-button:hover {
+  outline: none;
+}
+
+.lock-button:active .locked-icon,
+.lock-button:active .unlocked-icon {
+  transform: scale(0.9);
+}
+
+.locked-icon,
+.unlocked-icon {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
+}
+
+.hidden {
+  display: none;
 }

@@ -1,13 +1,44 @@
 // DOM Elements:
 newPaletteButton = document.getElementById("new-palette-button");
+lockButtons = document.querySelectorAll(".lock-button");
 
 // Data Structures:
 const colors = [
-  { hex: "#EA9999", colorId: "color-1", textId: "text-1" },
-  { hex: "#FACB9C", colorId: "color-2", textId: "text-2" },
-  { hex: "#FFE59A", colorId: "color-3", textId: "text-3" },
-  { hex: "#B6D7A8", colorId: "color-4", textId: "text-4" },
-  { hex: "#A4C4CA", colorId: "color-5", textId: "text-5" },
+  {
+    hex: "#EA9999",
+    id: 1,
+    colorId: "color-1",
+    textId: "text-1",
+    isLocked: false,
+  },
+  {
+    hex: "#FACB9C",
+    id: 2,
+    colorId: "color-2",
+    textId: "text-2",
+    isLocked: false,
+  },
+  {
+    hex: "#FFE59A",
+    id: 3,
+    colorId: "color-3",
+    textId: "text-3",
+    isLocked: false,
+  },
+  {
+    hex: "#B6D7A8",
+    id: 4,
+    colorId: "color-4",
+    textId: "text-4",
+    isLocked: false,
+  },
+  {
+    hex: "#A4C4CA",
+    id: 5,
+    colorId: "color-5",
+    textId: "text-5",
+    isLocked: false,
+  },
 ];
 
 // Event Listeners:
@@ -18,6 +49,12 @@ document.addEventListener("DOMContentLoaded", function () {
 newPaletteButton.addEventListener("click", function () {
   newPalette();
   populateColorBoxes();
+});
+
+lockButtons.forEach((lockButton) => {
+  lockButton.addEventListener("click", function () {
+    lockColor(lockButton);
+  });
 });
 
 // Helper Functions:
@@ -32,7 +69,9 @@ function populateColorBoxes() {
 
 function newPalette() {
   colors.forEach((color) => {
-    color.hex = randomHex();
+    if (!color.isLocked) {
+      color.hex = randomHex();
+    }
   });
 }
 
@@ -62,4 +101,18 @@ function randomHex() {
     hexCode += hexCharacters[randomIndex];
   }
   return hexCode;
+}
+
+function lockColor(lockButton) {
+  const buttonId = lockButton.id.substring(lockButton.id.indexOf("-") + 1);
+  colors.forEach((color) => {
+    if (color.id.toString() === buttonId) {
+      color.isLocked = !color.isLocked;
+    }
+  });
+
+  icons = [...lockButton.children];
+  icons.forEach((icon) => {
+    icon.hidden = !icon.hidden;
+  });
 }
