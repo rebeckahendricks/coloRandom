@@ -1,6 +1,6 @@
 :root {
-    --background-color: #E7F1F1;
-    --font-family-default: "Poppins", sans-serif;
+  --background-color: #e7f1f1;
+  --font-family-default: "Poppins", sans-serif;
 }
 
 *,
@@ -8,4 +8,50 @@
 *:after {
   box-sizing: border-box;
   font-family: var(--font-family-default);
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: var(--font-family-default);
+  background-color: var(--background-color);
+  margin: 0;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1 {
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.color-palette {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.color-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100px;
+}
+
+.color {
+  width: 100px;
+  height: 100px;
+  border: 2px solid #000;
+}
+
+.color-text {
+  margin-top: 5px;
+  font-size: 0.9em;
+  text-align: center;
 }
