@@ -1,0 +1,11 @@
+:root {
+    --background-color: #E7F1F1;
+    --font-family-default: "Poppins", sans-serif;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  font-family: var(--font-family-default);
+}
