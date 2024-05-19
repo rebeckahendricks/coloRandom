@@ -18,23 +18,62 @@ body {
   font-family: var(--font-family-default);
   background-color: var(--background-color);
   margin: 0;
+  padding: 0;
 }
 
 main {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  width: 100vw;
+  height: 100vh;
+  transition: width 0.5s ease, height 0.5s ease;
 }
 
+.colorandom-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70vw;
+  height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  transition: width 0.5s ease, height 0.5s ease, padding 0.5s ease;
+}
+
+.saved-palettes-section {
+  height: 100%;
+  border-left: 5px solid black;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  min-width: fit-content;
+  transition: flex 0.5s ease, border-left 0.5s ease;
+}
+
+.saved-palettes-container {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+/* Typography */
 h1 {
   font-size: 3em;
   margin-bottom: 50px;
+  text-align: center;
+  transition: font-size 0.5s ease, margin-bottom 0.5s ease;
 }
 
 .color-palette {
   display: flex;
   flex-direction: row;
   gap: 10px;
+  padding: 0px 50px;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  transition: padding 0.5s ease, gap 0.5s ease;
 }
 
 .color-box {
@@ -43,22 +82,28 @@ h1 {
   align-items: center;
   width: 100px;
   position: relative;
+  transition: width 0.5s ease;
 }
 
 .color {
   width: 100px;
   height: 100px;
   border: 2px solid #000;
+  transition: width 0.5s ease, height 0.5s ease;
 }
 
 .color-text {
   margin-top: 5px;
-  font-size: 0.9em;
+  font-size: 1em;
   text-align: center;
+  transition: font-size 0.5s ease, margin-top 0.5s ease;
 }
 
 .button-box {
   margin-top: 50px;
+  display: flex;
+  gap: 20px;
+  transition: margin-top 0.5s ease, gap 0.5s ease;
 }
 
 .palette-button {
@@ -69,15 +114,18 @@ h1 {
   border-bottom-left-radius: 100px;
   border-top-right-radius: 100px;
   padding: 3px 40px;
+  cursor: pointer;
+  transition: font-size 0.5s ease, padding 0.5s ease;
 }
 
 .lock-button {
   position: absolute;
-  bottom: 25px;
+  bottom: 30px;
   right: 0px;
   border: none;
   background: none;
   cursor: pointer;
+  transition: bottom 0.5s ease;
 }
 
 .lock-button:focus,
@@ -94,9 +142,135 @@ h1 {
 .unlocked-icon {
   width: 24px;
   height: 24px;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, width 0.5s ease, height 0.5s ease;
 }
 
 .hidden {
   display: none;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 800px) {
+  main {
+    flex-direction: column;
+  }
+
+  .colorandom-section {
+    width: 100vw;
+    height: 70vh;
+  }
+
+  .color-text {
+    font-size: 1em;
+  }
+
+  .saved-palettes-section {
+    width: 100vw;
+    height: 30vh;
+    border-left: none;
+    border-top: 5px solid black;
+    justify-content: start;
+  }
+
+  .color-box {
+    width: 90px;
+  }
+
+  .color {
+    width: 90px;
+    height: 90px;
+  }
+
+  .saved-palettes-container {
+    padding: 0px 20px;
+  }
+}
+
+@media (max-width: 550px) {
+  .colorandom-section {
+    width: 100vw;
+  }
+
+  .color-box {
+    width: 80px;
+  }
+
+  .color {
+    width: 80px;
+    height: 80px;
+  }
+
+  .color-text {
+    font-size: 0.7em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+  }
+
+  .button-box {
+    margin-top: 20px;
+    flex-direction: column;
+  }
+
+  .color-palette {
+    padding: 0px 20px;
+  }
+
+  .locked-icon,
+  .unlocked-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease, width 0.5s ease, height 0.5s ease;
+  }
+
+  .lock-button {
+    bottom: 25px;
+  }
+}
+
+@media (max-width: 450px) {
+  .color-box {
+    width: 70px;
+  }
+
+  .color {
+    width: 70px;
+    height: 70px;
+  }
+
+  .lock-button {
+    bottom: 22px;
+  }
+}
+
+@media (max-width: 380px) {
+  .colorandom-section {
+    width: 100vw;
+  }
+
+  .color-box {
+    width: 60px;
+  }
+
+  .color {
+    width: 50px;
+    height: 50px;
+  }
+
+  .color-text {
+    font-size: 0.7em;
+  }
+
+  h1 {
+    font-size: 2.2em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+  }
+
+  .color-palette {
+    padding: 0px 20px;
+  }
 }
