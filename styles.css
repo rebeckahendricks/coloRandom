@@ -158,6 +158,7 @@ h2,
   width: 100%;
   box-sizing: border-box;
   transition: padding 0.5s ease, gap 0.5s ease;
+  cursor: pointer;
 }
 
 .saved-color {
@@ -218,7 +219,7 @@ h2,
   .saved-palette {
     display: flex;
     flex-direction: row;
-    gap: 10px;
+    gap: 5px;
     height: auto;
     padding: 0px 10px;
   }

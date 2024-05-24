@@ -141,9 +141,43 @@ function renderSavedPalettes() {
         savedPalette.appendChild(colorBox);
       });
 
+      savedPalette.addEventListener("click", function () {
+        const savedPaletteID = savedPalette.id;
+        const paletteID = extractSavedPaletteIDFromElementID(savedPaletteID);
+        renderPaletteInMainView(paletteID);
+      });
+
       savedPalettesContainer.appendChild(savedPalette);
     });
   } else {
     noSavedPalettesText.hidden = false;
+  }
+}
+
+function renderPaletteInMainView(paletteID) {
+  var paletteObject = findSavedPaletteByID(paletteID);
+  const colorsArray = paletteObject.hexColors;
+  colorsArray.forEach((hexColor, index) => {
+    var color = currentColors.find((currentColor) => {
+      return index + 1 === currentColor.id;
+    });
+    color.hex = hexColor;
+  });
+  populateColorBoxes();
+}
+
+function findSavedPaletteByID(HTMLementID) {
+  var palette = savedPalettes.find((palette) => {
+    return palette.id === HTMLementID;
+  });
+  return palette;
+}
+
+function extractSavedPaletteIDFromElementID(elementID) {
+  const match = elementID.match(/-(\d+)$/);
+  if (match) {
+    return parseInt(match[1], 10);
+  } else {
+    throw new Error("Invalid format");
   }
 }
