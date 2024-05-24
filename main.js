@@ -1,9 +1,11 @@
 // DOM Elements:
-newPaletteButton = document.getElementById("new-palette-button");
 lockButtons = document.querySelectorAll(".lock-button");
+newPaletteButton = document.getElementById("new-palette-button");
+savePaletteButton = document.getElementById("save-palette-button");
+const noSavedPalettesText = document.getElementById("no-saved-palettes");
 
 // Data Structures:
-const colors = [
+const currentColors = [
   {
     hex: "#EA9999",
     id: 1,
@@ -41,9 +43,12 @@ const colors = [
   },
 ];
 
+var savedPalettes = [];
+
 // Event Listeners:
 document.addEventListener("DOMContentLoaded", function () {
   populateColorBoxes();
+  renderSavedPalettes();
 });
 
 newPaletteButton.addEventListener("click", function () {
@@ -57,9 +62,14 @@ lockButtons.forEach((lockButton) => {
   });
 });
 
+savePaletteButton.addEventListener("click", function () {
+  saveCurrentPalette();
+  renderSavedPalettes();
+});
+
 // Helper Functions:
 function populateColorBoxes() {
-  colors.forEach((color) => {
+  currentColors.forEach((color) => {
     const colorBox = document.getElementById(color.colorId);
     const textBox = document.getElementById(color.textId);
     colorBox.style.backgroundColor = color.hex;
@@ -68,7 +78,7 @@ function populateColorBoxes() {
 }
 
 function newPalette() {
-  colors.forEach((color) => {
+  currentColors.forEach((color) => {
     if (!color.isLocked) {
       color.hex = randomHex();
     }
@@ -76,24 +86,7 @@ function newPalette() {
 }
 
 function randomHex() {
-  const hexCharacters = [
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-  ];
+  const hexCharacters = "ABCDEF0123456789";
   let hexCode = "#";
 
   for (let i = 0; i < 6; i++) {
@@ -105,7 +98,7 @@ function randomHex() {
 
 function lockColor(lockButton) {
   const buttonId = lockButton.id.substring(lockButton.id.indexOf("-") + 1);
-  colors.forEach((color) => {
+  currentColors.forEach((color) => {
     if (color.id.toString() === buttonId) {
       color.isLocked = !color.isLocked;
     }
@@ -115,4 +108,42 @@ function lockColor(lockButton) {
   icons.forEach((icon) => {
     icon.hidden = !icon.hidden;
   });
+}
+
+function saveCurrentPalette() {
+  const newID = savedPalettes.length;
+  var savedPalette = { id: newID, hexColors: [] };
+
+  currentColors.forEach((color) => {
+    savedPalette.hexColors.push(color.hex);
+  });
+
+  savedPalettes.push(savedPalette);
+}
+
+function renderSavedPalettes() {
+  if (savedPalettes.length > 0) {
+    noSavedPalettesText.hidden = true;
+
+    savedPalettesContainer = document.querySelector(".saved-color-palettes");
+    savedPalettesContainer.innerHTML = "";
+
+    savedPalettes.forEach((palette) => {
+      const savedPalette = document.createElement("div");
+      savedPalette.className = "saved-palette";
+      savedPalette.id = `saved-palette-${palette.id}`;
+
+      palette.hexColors.forEach((hexColor, index) => {
+        const colorBox = document.createElement("div");
+        colorBox.className = "saved-color";
+        colorBox.id = `saved-color-${index}`;
+        colorBox.style.backgroundColor = hexColor;
+        savedPalette.appendChild(colorBox);
+      });
+
+      savedPalettesContainer.appendChild(savedPalette);
+    });
+  } else {
+    noSavedPalettesText.hidden = false;
+  }
 }
