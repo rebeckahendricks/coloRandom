@@ -113,24 +113,27 @@ function saveCurrentPalette() {
 
   // Save only if the palette does not already exist
   if (!savedPaletteExists(paletteObj)) {
-      savedPalettes.push(paletteObj);
+    savedPalettes.push(paletteObj);
   } else {
     Toastify({
-        text: "This palette has already been saved!",
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#333",
-        stopOnFocus: true
-      }).showToast();
+      text: "This palette has already been saved!",
+      duration: 3000,
+      close: true,
+      gravity: "top",
+      position: "right",
+      backgroundColor: "#333",
+      stopOnFocus: true,
+    }).showToast();
   }
 }
 
 function savedPaletteExists(paletteObject) {
-    return savedPalettes.some((savedPalette) => {
-        return JSON.stringify(savedPalette.hexColors) === JSON.stringify(paletteObject.hexColors)
-    })
+  return savedPalettes.some((savedPalette) => {
+    return (
+      JSON.stringify(savedPalette.hexColors) ===
+      JSON.stringify(paletteObject.hexColors)
+    );
+  });
 }
 
 function renderSavedPalettes() {
@@ -198,8 +201,16 @@ function createDeleteButton(savedPaletteId) {
 }
 
 function deletePalette(id) {
-  savedPalettes = savedPalettes.filter((palette) => palette.id !== id);
-  renderSavedPalettes();
+  showConfirmationToast(
+    "Are you sure you want to delete this palette?",
+    () => {
+      savedPalettes = savedPalettes.filter((palette) => palette.id !== id);
+      renderSavedPalettes();
+    },
+    () => {
+      return;
+    }
+  );
 }
 
 function renderPaletteInMainView(savedPaletteId) {
@@ -230,4 +241,35 @@ function extractColorID(HTMLelement) {
   } else {
     throw new Error("Invalid format");
   }
+}
+
+function showConfirmationToast(message, onConfirm, onCancel) {
+  const toast = document.createElement("div");
+  toast.innerHTML = `
+      <div>${message}</div>
+      <div style="margin-top: 10px;">
+        <button id="confirmBtn" style="margin-right: 5px;">Confirm</button>
+        <button id="cancelBtn">Cancel</button>
+      </div>
+    `;
+
+  const toastInstance = Toastify({
+    node: toast,
+    duration: -1,
+    close: false,
+    gravity: "top",
+    position: "center",
+    stopOnFocus: true,
+    backgroundColor: "#333",
+  }).showToast();
+
+  document.getElementById("confirmBtn").onclick = () => {
+    toastInstance.hideToast();
+    onConfirm();
+  };
+
+  document.getElementById("cancelBtn").onclick = () => {
+    toastInstance.hideToast();
+    onCancel();
+  };
 }
