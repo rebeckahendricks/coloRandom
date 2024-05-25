@@ -49,12 +49,15 @@ main {
   justify-content: center;
   min-width: fit-content;
   transition: flex 0.5s ease, border-left 0.5s ease;
+  overflow-y: auto;
 }
 
 .saved-palettes-container {
   display: flex;
   flex-direction: column;
   padding: 20px;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 h1 {
@@ -153,7 +156,7 @@ h2,
   display: flex;
   flex-direction: row;
   gap: 5px;
-  padding: 10px;
+  padding: 5px;
   justify-content: center;
   width: 100%;
   box-sizing: border-box;
@@ -167,12 +170,35 @@ h2,
   width: 40px;
 }
 
+.delete-button {
+  height: 40px;
+  width: 40px;
+  border: none;
+  background-color: var(--background-color);
+  cursor: pointer;
+  font-size: 32px;
+  text-align: center; /* Center the text horizontally */
+  font-family: "Arial", sans-serif; /* Use Arial font for cleaner look */
+  font-weight: bold;
+}
+
 .hidden {
   display: none;
 }
 
+.palette-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  transition: padding 0.5s ease, gap 0.5s ease;
+  cursor: pointer;
+  align-items: center;
+}
+
 /* Media Queries for Responsiveness */
-@media (max-width: 925px) {
+@media (max-width: 1000px) {
   main {
     flex-direction: column;
   }
@@ -200,7 +226,7 @@ h2,
   .saved-palettes-container {
     height: 100%;
     width: 100%;
-    overflow-x: auto; /* Allow horizontal scrolling */
+    overflow-x: auto;
     overflow-y: hidden;
     padding: 0px 20px;
   }
@@ -221,7 +247,7 @@ h2,
     flex-direction: row;
     gap: 5px;
     height: auto;
-    padding: 0px 10px;
+    padding: 0px;
   }
 
   .color-box {
@@ -231,6 +257,10 @@ h2,
   .color {
     width: 90px;
     height: 90px;
+  }
+
+  .palette-container {
+    padding-right: 5px;
   }
 }
 
