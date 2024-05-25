@@ -105,13 +105,32 @@ function lockColor(lockButton) {
 
 function saveCurrentPalette() {
   const newID = savedPalettes.length;
-  var savedPaletteObj = { id: newID, hexColors: [] };
+  var paletteObj = { id: newID, hexColors: [] };
 
   currentColors.forEach((currentColor) => {
-    savedPaletteObj.hexColors.push(currentColor.hex);
+    paletteObj.hexColors.push(currentColor.hex);
   });
 
-  savedPalettes.push(savedPaletteObj);
+  // Save only if the palette does not already exist
+  if (!savedPaletteExists(paletteObj)) {
+      savedPalettes.push(paletteObj);
+  } else {
+    Toastify({
+        text: "This palette has already been saved!",
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#333",
+        stopOnFocus: true
+      }).showToast();
+  }
+}
+
+function savedPaletteExists(paletteObject) {
+    return savedPalettes.some((savedPalette) => {
+        return JSON.stringify(savedPalette.hexColors) === JSON.stringify(paletteObject.hexColors)
+    })
 }
 
 function renderSavedPalettes() {
