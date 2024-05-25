@@ -36,15 +36,15 @@ var savedPalettes = [];
 
 // Event Listeners:
 document.addEventListener("DOMContentLoaded", function () {
-    showLoading();
-    setTimeout(() => {
-        retrieveLocalStorage("savedPalettes");
-        retrieveLocalStorage("currentColors");
-        populateColorBoxes();
-        renderSavedPalettes();
+  showLoading();
+  setTimeout(() => {
+    retrieveLocalStorage("savedPalettes");
+    retrieveLocalStorage("currentColors");
+    populateColorBoxes();
+    renderSavedPalettes();
 
-        hideLoading();
-    }, 500);
+    hideLoading();
+  }, 500);
 });
 
 newPaletteButton.addEventListener("click", function () {
@@ -306,11 +306,11 @@ function retrieveLocalStorage(itemName) {
 }
 
 function showLoading() {
-    document.getElementById('loadingIcon').classList.remove('hidden');
-    document.getElementById('content').classList.add('hidden');
+  document.getElementById("loadingIcon").classList.remove("hidden");
+  document.getElementById("content").classList.add("hidden");
 }
 
 function hideLoading() {
-    document.getElementById('loadingIcon').classList.add('hidden');
-    document.getElementById('content').classList.remove('hidden');
+  document.getElementById("loadingIcon").classList.add("hidden");
+  document.getElementById("content").classList.remove("hidden");
 }
