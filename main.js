@@ -2,43 +2,32 @@
 lockButtons = document.querySelectorAll(".lock-button");
 newPaletteButton = document.getElementById("new-palette-button");
 savePaletteButton = document.getElementById("save-palette-button");
-const noSavedPalettesText = document.getElementById("no-saved-palettes");
 
 // Data Structures:
 const currentColors = [
   {
     hex: "#EA9999",
     id: 0,
-    colorId: "color-0",
-    textId: "text-0",
     isLocked: false,
   },
   {
     hex: "#FACB9C",
     id: 1,
-    colorId: "color-1",
-    textId: "text-1",
     isLocked: false,
   },
   {
     hex: "#FFE59A",
     id: 2,
-    colorId: "color-2",
-    textId: "text-2",
     isLocked: false,
   },
   {
     hex: "#B6D7A8",
     id: 3,
-    colorId: "color-3",
-    textId: "text-3",
     isLocked: false,
   },
   {
     hex: "#A4C4CA",
     id: 4,
-    colorId: "color-4",
-    textId: "text-4",
     isLocked: false,
   },
 ];
@@ -69,18 +58,21 @@ savePaletteButton.addEventListener("click", function () {
 
 // Helper Functions:
 function populateColorBoxes() {
-  currentColors.forEach((color) => {
-    const colorBox = document.getElementById(color.colorId);
-    const textBox = document.getElementById(color.textId);
-    colorBox.style.backgroundColor = color.hex;
-    textBox.innerText = color.hex;
+  currentColors.forEach((currentColor) => {
+    const mainColorDiv = document.getElementById(
+      `main-color-${currentColor.id}`
+    );
+    mainColorDiv.style.backgroundColor = currentColor.hex;
+
+    const colorText = document.getElementById(`text-${currentColor.id}`);
+    colorText.innerText = currentColor.hex;
   });
 }
 
 function newPalette() {
-  currentColors.forEach((color) => {
-    if (!color.isLocked) {
-      color.hex = randomHex();
+  currentColors.forEach((currentColor) => {
+    if (!currentColor.isLocked) {
+      currentColor.hex = randomHex();
     }
   });
 }
@@ -97,75 +89,93 @@ function randomHex() {
 }
 
 function lockColor(lockButton) {
-  const buttonId = lockButton.id.substring(lockButton.id.indexOf("-") + 1);
-  currentColors.forEach((color) => {
-    if (color.id.toString() === buttonId) {
-      color.isLocked = !color.isLocked;
+  const colorID = extractColorID(lockButton);
+
+  currentColors.forEach((currentColor) => {
+    if (currentColor.id === colorID) {
+      currentColor.isLocked = !currentColor.isLocked;
     }
   });
 
-  icons = [...lockButton.children];
-  icons.forEach((icon) => {
-    icon.hidden = !icon.hidden;
+  lockIcons = [...lockButton.children];
+  lockIcons.forEach((lockIcon) => {
+    lockIcon.hidden = !lockIcon.hidden;
   });
 }
 
 function saveCurrentPalette() {
   const newID = savedPalettes.length;
-  var savedPalette = { id: newID, hexColors: [] };
+  var savedPaletteObj = { id: newID, hexColors: [] };
 
-  currentColors.forEach((color) => {
-    savedPalette.hexColors.push(color.hex);
+  currentColors.forEach((currentColor) => {
+    savedPaletteObj.hexColors.push(currentColor.hex);
   });
 
-  savedPalettes.push(savedPalette);
+  savedPalettes.push(savedPaletteObj);
 }
 
 function renderSavedPalettes() {
-  const savedPalettesContainer = document.querySelector(
-    ".saved-color-palettes"
-  );
-  savedPalettesContainer.innerHTML = `<p id="no-saved-palettes">No palettes saved yet!</p>`;
+  const savedPalettesContainer = document.querySelector(".saved-palettes");
 
   if (savedPalettes.length > 0) {
     savedPalettesContainer.innerHTML = "";
-    noSavedPalettesText.hidden = true;
 
     savedPalettes.forEach((palette) => {
-      const paletteContainer = document.createElement("div");
-      paletteContainer.className = "palette-container";
-
-      const savedPalette = document.createElement("div");
-      savedPalette.className = "saved-palette";
-      savedPalette.id = `saved-palette-${palette.id}`;
-
-      palette.hexColors.forEach((hexColor, index) => {
-        const colorBox = document.createElement("div");
-        colorBox.className = "saved-color";
-        colorBox.id = `saved-color-${index}`;
-        colorBox.style.backgroundColor = hexColor;
-        savedPalette.appendChild(colorBox);
-      });
-
-      savedPalette.addEventListener("click", function () {
-        const savedPaletteID = savedPalette.id;
-        const paletteID = extractSavedPaletteIDFromElementID(savedPaletteID);
-        renderPaletteInMainView(paletteID);
-      });
-
-      paletteContainer.appendChild(savedPalette);
-
-      const deleteButton = document.createElement("button");
-      deleteButton.className = "delete-button";
-      deleteButton.innerHTML = "&times;";
-      deleteButton.onclick = () => deletePalette(palette.id);
-
-      paletteContainer.appendChild(deleteButton);
+      const paletteContainer = createPaletteContainerDOM(palette);
       savedPalettesContainer.appendChild(paletteContainer);
     });
   } else {
-    noSavedPalettesText.hidden = false;
+    savedPalettesContainer.innerHTML = `<p id="no-saved-palettes">No palettes saved yet!</p>`;
   }
+}
+
+function createPaletteContainerDOM(palette) {
+  const paletteContainer = document.createElement("div");
+  paletteContainer.className = "palette-container";
+
+  const savedPalette = createSavedPaletteDOM(palette);
+  paletteContainer.appendChild(savedPalette);
+
+  const deleteButton = createDeleteButton(palette.id);
+  paletteContainer.appendChild(deleteButton);
+
+  return paletteContainer;
+}
+
+function createSavedPaletteDOM(palette) {
+  const savedPalette = document.createElement("div");
+  savedPalette.className = "saved-palette";
+  savedPalette.id = `saved-palette-${palette.id}`;
+
+  palette.hexColors.forEach((hexColor, index) => {
+    const colorBox = createColorBoxDOM(hexColor, index);
+    savedPalette.appendChild(colorBox);
+  });
+
+  savedPalette.addEventListener("click", function () {
+    const paletteID = extractColorID(savedPalette);
+    renderPaletteInMainView(paletteID);
+  });
+
+  return savedPalette;
+}
+
+function createColorBoxDOM(hexColor, index) {
+  const colorBox = document.createElement("div");
+  colorBox.className = "saved-color";
+  colorBox.id = `saved-color-${index}`;
+  colorBox.style.backgroundColor = hexColor;
+
+  return colorBox;
+}
+
+function createDeleteButton(savedPaletteId) {
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "delete-button";
+  deleteButton.innerHTML = "&times;";
+  deleteButton.onclick = () => deletePalette(savedPaletteId);
+
+  return deleteButton;
 }
 
 function deletePalette(id) {
@@ -173,27 +183,28 @@ function deletePalette(id) {
   renderSavedPalettes();
 }
 
-function renderPaletteInMainView(paletteID) {
-  var paletteObject = findSavedPaletteByID(paletteID);
+function renderPaletteInMainView(savedPaletteId) {
+  var paletteObject = findSavedPaletteByID(savedPaletteId);
 
   const colorsArray = paletteObject.hexColors;
   colorsArray.forEach((hexColor, index) => {
-    var color = currentColors.find((currentColor) => {
+    var newCurrentColor = currentColors.find((currentColor) => {
       return index === currentColor.id;
     });
-    color.hex = hexColor;
+    newCurrentColor.hex = hexColor;
   });
   populateColorBoxes();
 }
 
 function findSavedPaletteByID(HTMLementID) {
-  var palette = savedPalettes.find((palette) => {
-    return palette.id === HTMLementID;
+  var savedPalette = savedPalettes.find((savedPalette) => {
+    return savedPalette.id === HTMLementID;
   });
-  return palette;
+  return savedPalette;
 }
 
-function extractSavedPaletteIDFromElementID(elementID) {
+function extractColorID(HTMLelement) {
+  const elementID = HTMLelement.id;
   const match = elementID.match(/-(\d+)$/);
   if (match) {
     return parseInt(match[1], 10);
