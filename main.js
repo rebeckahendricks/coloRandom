@@ -4,7 +4,7 @@ newPaletteButton = document.getElementById("new-palette-button");
 savePaletteButton = document.getElementById("save-palette-button");
 
 // Data Structures:
-const currentColors = [
+var currentColors = [
   {
     hex: "#EA9999",
     id: 0,
@@ -36,6 +36,8 @@ var savedPalettes = [];
 
 // Event Listeners:
 document.addEventListener("DOMContentLoaded", function () {
+  retrieveLocalStorage("savedPalettes");
+  retrieveLocalStorage("currentColors");
   populateColorBoxes();
   renderSavedPalettes();
 });
@@ -43,6 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
 newPaletteButton.addEventListener("click", function () {
   newPalette();
   populateColorBoxes();
+  saveInLocalStorage("currentColors", currentColors);
 });
 
 lockButtons.forEach((lockButton) => {
@@ -114,6 +117,7 @@ function saveCurrentPalette() {
   // Save only if the palette does not already exist
   if (!savedPaletteExists(paletteObj)) {
     savedPalettes.push(paletteObj);
+    saveInLocalStorage("savedPalettes", savedPalettes);
   } else {
     Toastify({
       text: "This palette has already been saved!",
@@ -205,6 +209,7 @@ function deletePalette(id) {
     "Are you sure you want to delete this palette?",
     () => {
       savedPalettes = savedPalettes.filter((palette) => palette.id !== id);
+      saveInLocalStorage("savedPalettes", savedPalettes);
       renderSavedPalettes();
     },
     () => {
@@ -223,6 +228,7 @@ function renderPaletteInMainView(savedPaletteId) {
     });
     newCurrentColor.hex = hexColor;
   });
+  saveInLocalStorage("currentColors", currentColors);
   populateColorBoxes();
 }
 
@@ -272,4 +278,24 @@ function showConfirmationToast(message, onConfirm, onCancel) {
     toastInstance.hideToast();
     onCancel();
   };
+}
+
+function saveInLocalStorage(itemName, data) {
+  const dataToJSON = JSON.stringify(data);
+  window.localStorage.setItem(itemName, dataToJSON);
+}
+
+function retrieveLocalStorage(itemName) {
+  const parsedData = JSON.parse(window.localStorage.getItem(itemName));
+
+  if (parsedData) {
+    switch (itemName) {
+      case "currentColors":
+        currentColors = parsedData;
+        break;
+      case "savedPalettes":
+        savedPalettes = parsedData;
+        break;
+    }
+  }
 }
