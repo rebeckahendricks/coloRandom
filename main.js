@@ -97,7 +97,7 @@ function randomHex() {
 }
 
 function lockColor(lockButton) {
-  const buttonId = lockButton.id.substring(lockButton.id.indexOf("-"));
+  const buttonId = lockButton.id.substring(lockButton.id.indexOf("-") + 1);
   currentColors.forEach((color) => {
     if (color.id.toString() === buttonId) {
       color.isLocked = !color.isLocked;
