@@ -134,6 +134,12 @@
             </button>
           </div>
         </div>
+        <input
+          type="text"
+          id="palette-name"
+          class="palette-name-input"
+          placeholder="Palette name (optional)"
+        />
         <div class="button-box">
           <button id="new-palette-button" class="palette-button" type="button">
             New Palette
@@ -146,7 +152,15 @@
 
       <section class="saved-palettes-section">
         <div class="saved-palettes-container">
-          <h2>Saved Palettes</h2>
+          <div class="search-container">
+            <h2>Saved Palettes</h2>
+            <input
+              type="text"
+              id="search-palettes"
+              class="search-palettes-input"
+              placeholder="Search palettes by name"
+            />
+          </div>
           <div class="saved-palettes">
             <p id="no-saved-palettes">No palettes saved yet!</p>
             <!-- Saved palettes will be dynamically inserted here -->
