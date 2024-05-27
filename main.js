@@ -2,6 +2,7 @@
 lockButtons = document.querySelectorAll(".lock-button");
 newPaletteButton = document.getElementById("new-palette-button");
 savePaletteButton = document.getElementById("save-palette-button");
+const paletteNameInput = document.getElementById("palette-name");
 
 // Data Structures:
 var currentColors = [
@@ -31,7 +32,7 @@ var currentColors = [
     isLocked: false,
   },
 ];
-
+var currentPaletteName = "";
 var savedPalettes = [];
 
 // Event Listeners:
@@ -40,6 +41,7 @@ document.addEventListener("DOMContentLoaded", function () {
   setTimeout(() => {
     retrieveLocalStorage("savedPalettes");
     retrieveLocalStorage("currentColors");
+    retrieveLocalStorage("currentPaletteName");
     populateColorBoxes();
     renderSavedPalettes();
 
@@ -50,7 +52,6 @@ document.addEventListener("DOMContentLoaded", function () {
 newPaletteButton.addEventListener("click", function () {
   newPalette();
   populateColorBoxes();
-  saveInLocalStorage("currentColors", currentColors);
 });
 
 lockButtons.forEach((lockButton) => {
@@ -75,6 +76,8 @@ function populateColorBoxes() {
     const colorText = document.getElementById(`text-${currentColor.id}`);
     colorText.innerText = currentColor.hex;
   });
+
+  paletteNameInput.value = currentPaletteName;
 }
 
 function newPalette() {
@@ -83,6 +86,10 @@ function newPalette() {
       currentColor.hex = randomHex();
     }
   });
+  saveInLocalStorage("currentColors", currentColors);
+
+  currentPaletteName = "";
+  saveInLocalStorage("currentPaletteName", currentPaletteName);
 }
 
 function randomHex() {
@@ -112,37 +119,71 @@ function lockColor(lockButton) {
 }
 
 function saveCurrentPalette() {
+  const paletteObj = createNewSavedPaletteObject();
+
+  const paletteNameInput = document.getElementById("palette-name");
+  currentPaletteName = paletteNameInput.value;
+  saveInLocalStorage("currentPaletteName", currentPaletteName);
+
+  var existingPalette = savedPaletteExists(paletteObj);
+  if (existingPalette) {
+    if (existingPalette.name === paletteObj.name) {
+      Toastify({
+        text: `This palette has already been saved!`,
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#333",
+        stopOnFocus: true,
+      }).showToast();
+    } else {
+      updatePaletteName(existingPalette, paletteObj.name);
+    }
+  } else {
+    savedPalettes.push(paletteObj);
+    saveInLocalStorage("savedPalettes", savedPalettes);
+  }
+}
+
+function createNewSavedPaletteObject() {
+  const paletteNameInput = document.getElementById("palette-name");
+  const paletteName = paletteNameInput.value.trim();
   const newID = savedPalettes.length;
-  var paletteObj = { id: newID, hexColors: [] };
+
+  var paletteObj = { id: newID, name: paletteName, hexColors: [] };
 
   currentColors.forEach((currentColor) => {
     paletteObj.hexColors.push(currentColor.hex);
   });
 
-  // Save only if the palette does not already exist
-  if (!savedPaletteExists(paletteObj)) {
-    savedPalettes.push(paletteObj);
-    saveInLocalStorage("savedPalettes", savedPalettes);
-  } else {
-    Toastify({
-      text: "This palette has already been saved!",
-      duration: 3000,
-      close: true,
-      gravity: "top",
-      position: "right",
-      backgroundColor: "#333",
-      stopOnFocus: true,
-    }).showToast();
-  }
+  return paletteObj;
+}
+
+function updatePaletteName(existingPalette, newName) {
+  existingPalette.name = newName;
+  Toastify({
+    text: `Palette name has been updated!`,
+    duration: 3000,
+    close: true,
+    gravity: "top",
+    position: "right",
+    backgroundColor: "#333",
+    stopOnFocus: true,
+  }).showToast();
+  saveInLocalStorage("savedPalettes", savedPalettes);
+  saveInLocalStorage("currentPaletteName", currentPaletteName);
 }
 
 function savedPaletteExists(paletteObject) {
-  return savedPalettes.some((savedPalette) => {
+  var matchingSavedPalette = savedPalettes.find((savedPalette) => {
     return (
       JSON.stringify(savedPalette.hexColors) ===
       JSON.stringify(paletteObject.hexColors)
     );
   });
+
+  return matchingSavedPalette;
 }
 
 function renderSavedPalettes() {
@@ -225,6 +266,8 @@ function deletePalette(id) {
 
 function renderPaletteInMainView(savedPaletteId) {
   var paletteObject = findSavedPaletteByID(savedPaletteId);
+  currentPaletteName = paletteObject.name;
+  saveInLocalStorage("currentPaletteName", currentPaletteName);
 
   const colorsArray = paletteObject.hexColors;
   colorsArray.forEach((hexColor, index) => {
@@ -291,17 +334,33 @@ function saveInLocalStorage(itemName, data) {
 }
 
 function retrieveLocalStorage(itemName) {
-  const parsedData = JSON.parse(window.localStorage.getItem(itemName));
-
-  if (parsedData) {
-    switch (itemName) {
-      case "currentColors":
-        currentColors = parsedData;
-        break;
-      case "savedPalettes":
-        savedPalettes = parsedData;
-        break;
+  try {
+    const item = window.localStorage.getItem(itemName);
+    if (!item) {
+      console.warn(`No local storage item found with the name: ${itemName}`);
+      return;
     }
+
+    const parsedData = JSON.parse(item);
+
+    if (parsedData) {
+      switch (itemName) {
+        case "currentColors":
+          currentColors = parsedData;
+          break;
+        case "savedPalettes":
+          savedPalettes = parsedData;
+          break;
+        case "currentPaletteName":
+          currentPaletteName = parsedData;
+          break;
+        default:
+          console.warn(`Unknown local storage item name: ${itemName}`);
+          break;
+      }
+    }
+  } catch (error) {
+    console.error(`Error retrieving local storage item: ${itemName}`, error);
   }
 }
 
