@@ -3,6 +3,7 @@ lockButtons = document.querySelectorAll(".lock-button");
 newPaletteButton = document.getElementById("new-palette-button");
 savePaletteButton = document.getElementById("save-palette-button");
 const paletteNameInput = document.getElementById("palette-name");
+searchPalettesInput = document.getElementById("search-palettes");
 
 // Data Structures:
 var currentColors = [
@@ -63,6 +64,11 @@ lockButtons.forEach((lockButton) => {
 savePaletteButton.addEventListener("click", function () {
   saveCurrentPalette();
   renderSavedPalettes();
+});
+
+searchPalettesInput.addEventListener("input", function (event) {
+  const searchTerm = event.target.value.toLowerCase();
+  searchPalettesByName(searchTerm);
 });
 
 // Helper Functions:
@@ -333,6 +339,28 @@ function extractColorID(HTMLelement) {
   } else {
     throw new Error("Invalid format");
   }
+}
+
+function searchPalettesByName(searchTerm) {
+  const filteredPalettes = savedPalettes.filter((savedPalette) =>
+    savedPalette.name.toLowerCase().includes(searchTerm)
+  );
+  renderFilteredPalettes(filteredPalettes);
+}
+
+function renderFilteredPalettes(filteredPalettes) {
+  const savedPalettesContainer = document.querySelector(".saved-palettes");
+  savedPalettesContainer.innerHTML = "";
+
+  if (filteredPalettes.length === 0) {
+    savedPalettesContainer.innerHTML = `<p id="no-found-palettes">No palettes found.</p>`;
+    return;
+  }
+
+  filteredPalettes.forEach((palette) => {
+    const paletteContainer = createPaletteContainerDOM(palette);
+    savedPalettesContainer.appendChild(paletteContainer);
+  });
 }
 
 function showConfirmationToast(message, onConfirm, onCancel) {

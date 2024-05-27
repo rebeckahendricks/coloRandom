@@ -221,9 +221,8 @@ h2,
 }
 
 .search-palettes-input {
-  width: 250px;
+  width: 265px;
   margin: 5px;
-  width: 100%;
   box-sizing: border-box;
 }
 
@@ -241,6 +240,7 @@ h2,
     margin: 0px;
     text-align: left;
     padding-left: 15px;
+    padding-top: 5px;
   }
 
   .saved-palettes-section {
@@ -310,7 +310,7 @@ h2,
   }
 
   .search-palettes-input {
-    width: 250px !important;
+    width: 255px !important;
     margin: 10px !important;
   }
 }
