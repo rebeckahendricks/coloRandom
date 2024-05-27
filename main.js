@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
     retrieveLocalStorage("currentColors");
     retrieveLocalStorage("currentPaletteName");
     populateMainPalette();
-    renderSavedPalettes();
+    renderSavedPalettes(savedPalettes);
 
     hideLoading();
   }, 500);
@@ -63,7 +63,7 @@ lockButtons.forEach((lockButton) => {
 
 savePaletteButton.addEventListener("click", function () {
   saveCurrentPalette();
-  renderSavedPalettes();
+  renderSavedPalettes(savedPalettes);
 });
 
 searchPalettesInput.addEventListener("input", function (event) {
@@ -228,24 +228,30 @@ function savedPaletteExists(paletteObject) {
   return matchingSavedPalette;
 }
 
-function renderSavedPalettes() {
+function renderFilteredPalettes(filteredPalettes) {
   const savedPalettesContainer = document.querySelector(".saved-palettes");
+  savedPalettesContainer.innerHTML = "";
 
-  if (savedPalettes.length > 0) {
-    savedPalettesContainer.innerHTML = "";
-
-    savedPalettes.forEach((palette) => {
-      const paletteContainer = createPaletteContainerDOM(palette);
-      savedPalettesContainer.appendChild(paletteContainer);
-    });
-  } else {
-    savedPalettesContainer.innerHTML = `<p id="no-saved-palettes">No palettes saved yet!</p>`;
+  if (filteredPalettes.length === 0) {
+    savedPalettesContainer.innerHTML = `<p id="no-found-palettes">No palettes found.</p>`;
+    return;
   }
+
+  filteredPalettes.forEach((palette) => {
+    const paletteContainer = createPaletteContainerDOM(palette);
+    savedPalettesContainer.appendChild(paletteContainer);
+  });
 }
 
 function createPaletteContainerDOM(palette) {
   const paletteContainer = document.createElement("div");
   paletteContainer.className = "palette-container";
+
+  if (palette.name !== "") {
+    paletteContainer.classList.add("has-name");
+    const paletteInfoTooltip = createPaletteTooltip(palette);
+    paletteContainer.appendChild(paletteInfoTooltip);
+  }
 
   const savedPalette = createSavedPaletteDOM(palette);
   paletteContainer.appendChild(savedPalette);
@@ -298,12 +304,25 @@ function deletePalette(id) {
     () => {
       savedPalettes = savedPalettes.filter((palette) => palette.id !== id);
       saveInLocalStorage("savedPalettes", savedPalettes);
-      renderSavedPalettes();
+      renderSavedPalettes(savedPalettes);
     },
     () => {
       return;
     }
   );
+}
+
+function createPaletteTooltip(savedPalette) {
+  const paletteInfoTooltip = document.createElement("div");
+  paletteInfoTooltip.className = "palette-container palette-info-tooltip";
+  const paletteName = document.createElement("div");
+  paletteName.textContent = `${savedPalette.name}`;
+  paletteInfoTooltip.appendChild(paletteName);
+
+  const deleteButton = createDeleteButton(savedPalette.id);
+  paletteInfoTooltip.appendChild(deleteButton);
+
+  return paletteInfoTooltip;
 }
 
 function renderPaletteInMainView(savedPaletteId) {
@@ -345,10 +364,10 @@ function searchPalettesByName(searchTerm) {
   const filteredPalettes = savedPalettes.filter((savedPalette) =>
     savedPalette.name.toLowerCase().includes(searchTerm)
   );
-  renderFilteredPalettes(filteredPalettes);
+  renderSavedPalettes(filteredPalettes);
 }
 
-function renderFilteredPalettes(filteredPalettes) {
+function renderSavedPalettes(filteredPalettes) {
   const savedPalettesContainer = document.querySelector(".saved-palettes");
   savedPalettesContainer.innerHTML = "";
 
