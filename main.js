@@ -251,7 +251,6 @@ function createPaletteContainerDOM(palette) {
     paletteContainer.classList.add("has-name");
     const paletteInfoTooltip = createPaletteTooltip(palette);
     paletteContainer.appendChild(paletteInfoTooltip);
-    paletteContainer.addEventListener('mouseover', () => adjustTooltipPosition(paletteInfoTooltip));
   }
 
   const savedPalette = createSavedPaletteDOM(palette);
@@ -315,9 +314,15 @@ function deletePalette(id) {
 
 function createPaletteTooltip(savedPalette) {
   const paletteInfoTooltip = document.createElement("div");
+  paletteInfoTooltip.id = `tooltip-${savedPalette.id}`;
   paletteInfoTooltip.className = "palette-container palette-info-tooltip";
   const paletteName = document.createElement("div");
   paletteName.textContent = `${savedPalette.name}`;
+
+  paletteInfoTooltip.addEventListener("click", function () {
+    renderPaletteInMainView(savedPalette.id);
+  });
+
   paletteInfoTooltip.appendChild(paletteName);
 
   const deleteButton = createDeleteButton(savedPalette.id);
@@ -325,26 +330,6 @@ function createPaletteTooltip(savedPalette) {
 
   return paletteInfoTooltip;
 }
-
-function adjustTooltipPosition(tooltip) {
-    const tooltipRect = tooltip.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-  
-    // Reset tooltip position
-    tooltip.style.left = '50%';
-    tooltip.style.right = 'auto';
-    tooltip.style.transform = 'translateX(-50%)';
-  
-    // Check if the tooltip exceeds the viewport width
-    if (tooltipRect.left < 0) {
-      tooltip.style.left = '0';
-      tooltip.style.transform = 'translateX(0)';
-    } else if (tooltipRect.right > viewportWidth) {
-      tooltip.style.left = 'auto';
-      tooltip.style.right = '0';
-      tooltip.style.transform = 'translateX(0)';
-    }
-  }
 
 function renderPaletteInMainView(savedPaletteId) {
   var paletteObject = findSavedPaletteByID(savedPaletteId);
