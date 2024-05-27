@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
     retrieveLocalStorage("savedPalettes");
     retrieveLocalStorage("currentColors");
     retrieveLocalStorage("currentPaletteName");
-    populateColorBoxes();
+    populateMainPalette();
     renderSavedPalettes();
 
     hideLoading();
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 newPaletteButton.addEventListener("click", function () {
   newPalette();
-  populateColorBoxes();
+  populateMainPalette();
 });
 
 lockButtons.forEach((lockButton) => {
@@ -66,26 +66,61 @@ savePaletteButton.addEventListener("click", function () {
 });
 
 // Helper Functions:
-function populateColorBoxes() {
+function populateMainPalette() {
   currentColors.forEach((currentColor) => {
-    const mainColorDiv = document.getElementById(
-      `main-color-${currentColor.id}`
-    );
-    mainColorDiv.style.backgroundColor = currentColor.hex;
-
-    const colorText = document.getElementById(`text-${currentColor.id}`);
-    colorText.innerText = currentColor.hex;
+    handleColorBox(currentColor);
+    handleColorText(currentColor);
+    handleLockIcons(currentColor);
   });
 
   paletteNameInput.value = currentPaletteName;
 }
 
+function handleColorBox(currentColor) {
+  const mainColorDiv = document.getElementById(`main-color-${currentColor.id}`);
+  mainColorDiv.style.backgroundColor = currentColor.hex;
+}
+
+function handleColorText(currentColor) {
+  const colorText = document.getElementById(`text-${currentColor.id}`);
+  colorText.innerText = currentColor.hex;
+}
+
+function handleLockIcons(currentColor) {
+  const colorLock = document.getElementById(`lock-${currentColor.id}`);
+  const lockIcons = [...colorLock.children];
+
+  lockIcons.forEach((lockIcon) => {
+    lockIcon.hidden = lockIcon.classList.contains("locked-icon")
+      ? !currentColor.isLocked
+      : currentColor.isLocked;
+  });
+}
+
 function newPalette() {
+  let lockedColorsCount = 0;
+
   currentColors.forEach((currentColor) => {
-    if (!currentColor.isLocked) {
+    if (currentColor.isLocked) {
+      lockedColorsCount++;
+    } else {
       currentColor.hex = randomHex();
     }
+
+    if (lockedColorsCount === 5) {
+      Toastify({
+        text: `All colors are locked!`,
+        duration: 3000,
+        close: true,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#333",
+        stopOnFocus: true,
+      }).showToast();
+      return;
+    }
   });
+
   saveInLocalStorage("currentColors", currentColors);
 
   currentPaletteName = "";
@@ -111,6 +146,7 @@ function lockColor(lockButton) {
       currentColor.isLocked = !currentColor.isLocked;
     }
   });
+  saveInLocalStorage("currentColors", currentColors);
 
   lockIcons = [...lockButton.children];
   lockIcons.forEach((lockIcon) => {
@@ -275,9 +311,11 @@ function renderPaletteInMainView(savedPaletteId) {
       return index === currentColor.id;
     });
     newCurrentColor.hex = hexColor;
+    newCurrentColor.isLocked = false;
   });
+
   saveInLocalStorage("currentColors", currentColors);
-  populateColorBoxes();
+  populateMainPalette();
 }
 
 function findSavedPaletteByID(HTMLementID) {
