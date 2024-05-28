@@ -25,10 +25,13 @@ document.addEventListener("DOMContentLoaded", function () {
     retrieveLocalStorage("currentPaletteName");
     populateMainPalette();
     renderSavedPalettes(savedPalettes);
+    adjustTooltipsPosition();
 
     hideLoading();
   }, 500);
 });
+
+window.addEventListener("resize", adjustTooltipsPosition);
 
 newPaletteButton.addEventListener("click", function () {
   newPalette();
@@ -374,4 +377,27 @@ function showToast(message) {
     backgroundColor: "#333",
     stopOnFocus: true,
   }).showToast();
+}
+
+function adjustTooltipsPosition() {
+  document.querySelectorAll(".palette-info-tooltip").forEach((tooltip) => {
+    const paletteContainer = tooltip.closest(".palette-container");
+    if (paletteContainer) {
+      const tooltipRect = tooltip.getBoundingClientRect();
+
+      // Check if tooltip is going out of the viewport
+      if (tooltipRect.left < 0) {
+        tooltip.style.left = "0";
+        tooltip.style.transform = "translateX(0)";
+      } else if (tooltipRect.right > window.innerWidth) {
+        tooltip.style.left = "auto";
+        tooltip.style.right = "0";
+        tooltip.style.transform = "translateX(0)";
+      } else {
+        tooltip.style.left = "50%";
+        tooltip.style.right = "auto";
+        tooltip.style.transform = "translateX(-50%)";
+      }
+    }
+  });
 }
