@@ -7,31 +7,11 @@ searchPalettesInput = document.getElementById("search-palettes");
 
 // Data Structures:
 var currentColors = [
-  {
-    hex: "#EA9999",
-    id: 0,
-    isLocked: false,
-  },
-  {
-    hex: "#FACB9C",
-    id: 1,
-    isLocked: false,
-  },
-  {
-    hex: "#FFE59A",
-    id: 2,
-    isLocked: false,
-  },
-  {
-    hex: "#B6D7A8",
-    id: 3,
-    isLocked: false,
-  },
-  {
-    hex: "#A4C4CA",
-    id: 4,
-    isLocked: false,
-  },
+  { hex: "#EA9999", id: 0, isLocked: false },
+  { hex: "#FACB9C", id: 1, isLocked: false },
+  { hex: "#FFE59A", id: 2, isLocked: false },
+  { hex: "#B6D7A8", id: 3, isLocked: false },
+  { hex: "#A4C4CA", id: 4, isLocked: false },
 ];
 var currentPaletteName = "";
 var savedPalettes = [];
@@ -57,7 +37,7 @@ newPaletteButton.addEventListener("click", function () {
 
 lockButtons.forEach((lockButton) => {
   lockButton.addEventListener("click", function () {
-    lockColor(lockButton);
+    toggleLockColor(lockButton);
   });
 });
 
@@ -74,77 +54,63 @@ searchPalettesInput.addEventListener("input", function (event) {
 // Helper Functions:
 function populateMainPalette() {
   currentColors.forEach((currentColor) => {
-    handleColorBox(currentColor);
-    handleColorText(currentColor);
-    handleLockIcons(currentColor);
+    updateColorBox(currentColor);
+    updateColorText(currentColor);
+    updateLockIcons(currentColor);
   });
 
   paletteNameInput.value = currentPaletteName;
 }
 
-function handleColorBox(currentColor) {
-  const mainColorDiv = document.getElementById(`main-color-${currentColor.id}`);
-  mainColorDiv.style.backgroundColor = currentColor.hex;
+function updateColorBox(currentColor) {
+  document.getElementById(
+    `main-color-${currentColor.id}`
+  ).style.backgroundColor = currentColor.hex;
 }
 
-function handleColorText(currentColor) {
-  const colorText = document.getElementById(`text-${currentColor.id}`);
-  colorText.innerText = currentColor.hex;
+function updateColorText(currentColor) {
+  document.getElementById(`text-${currentColor.id}`).innerText =
+    currentColor.hex;
 }
 
-function handleLockIcons(currentColor) {
-  const colorLock = document.getElementById(`lock-${currentColor.id}`);
-  const lockIcons = [...colorLock.children];
+function updateLockIcons(currentColor) {
+  const lockButton = document.getElementById(`lock-${currentColor.id}`);
+  const lockIcons = [...lockButton.children];
 
-  lockIcons.forEach((lockIcon) => {
-    lockIcon.hidden = lockIcon.classList.contains("locked-icon")
+  lockIcons.forEach((icon) => {
+    icon.hidden = icon.classList.contains("locked-icon")
       ? !currentColor.isLocked
       : currentColor.isLocked;
   });
 }
 
 function newPalette() {
-  let lockedColorsCount = 0;
+  let allColorsLocked = true;
 
   currentColors.forEach((currentColor) => {
-    if (currentColor.isLocked) {
-      lockedColorsCount++;
-    } else {
-      currentColor.hex = randomHex();
-    }
-
-    if (lockedColorsCount === 5) {
-      Toastify({
-        text: `All colors are locked!`,
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#333",
-        stopOnFocus: true,
-      }).showToast();
-      return;
+    if (!currentColor.isLocked) {
+      currentColor.hex = generateRandomHex();
+      allColorsLocked = false;
     }
   });
 
-  saveInLocalStorage("currentColors", currentColors);
+  if (allColorsLocked) {
+    showToast("All colors are locked!");
+    return;
+  }
 
+  saveInLocalStorage("currentColors", currentColors);
   currentPaletteName = "";
   saveInLocalStorage("currentPaletteName", currentPaletteName);
 }
 
-function randomHex() {
-  const hexCharacters = "ABCDEF0123456789";
-  let hexCode = "#";
-
-  for (let i = 0; i < 6; i++) {
-    const randomIndex = Math.floor(Math.random() * hexCharacters.length);
-    hexCode += hexCharacters[randomIndex];
-  }
-  return hexCode;
+function generateRandomHex() {
+  return `#${Array.from({ length: 6 })
+    .map(() => "ABCDEF0123456789"[Math.floor(Math.random() * 16)])
+    .join("")}`;
 }
 
-function lockColor(lockButton) {
+function toggleLockColor(lockButton) {
   const colorID = extractColorID(lockButton);
 
   currentColors.forEach((currentColor) => {
@@ -161,89 +127,62 @@ function lockColor(lockButton) {
 }
 
 function saveCurrentPalette() {
-  const paletteObj = createNewSavedPaletteObject();
-
-  const paletteNameInput = document.getElementById("palette-name");
+  const palette = createPaletteObject();
   currentPaletteName = paletteNameInput.value;
   saveInLocalStorage("currentPaletteName", currentPaletteName);
 
-  var existingPalette = savedPaletteExists(paletteObj);
+  const existingPalette = findMatchingPalette(palette);
   if (existingPalette) {
-    if (existingPalette.name === paletteObj.name) {
-      Toastify({
-        text: `This palette has already been saved!`,
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#333",
-        stopOnFocus: true,
-      }).showToast();
+    if (existingPalette.name === palette.name) {
+      showToast("This palette has already been saved!");
     } else {
-      updatePaletteName(existingPalette, paletteObj.name);
+      updatePaletteName(existingPalette, palette.name);
     }
   } else {
-    savedPalettes.push(paletteObj);
+    savedPalettes.push(palette);
     saveInLocalStorage("savedPalettes", savedPalettes);
   }
 }
 
-function createNewSavedPaletteObject() {
-  const paletteNameInput = document.getElementById("palette-name");
-  const paletteName = paletteNameInput.value.trim();
-  const newID = savedPalettes.length;
-
-  var paletteObj = { id: newID, name: paletteName, hexColors: [] };
-
-  currentColors.forEach((currentColor) => {
-    paletteObj.hexColors.push(currentColor.hex);
-  });
-
-  return paletteObj;
+function createPaletteObject() {
+  return {
+    id: savedPalettes.length,
+    name: paletteNameInput.value.trim(),
+    hexColors: currentColors.map((currentColor) => currentColor.hex),
+  };
 }
 
-function updatePaletteName(existingPalette, newName) {
-  existingPalette.name = newName;
-  Toastify({
-    text: `Palette name has been updated!`,
-    duration: 3000,
-    close: true,
-    gravity: "top",
-    position: "right",
-    backgroundColor: "#333",
-    stopOnFocus: true,
-  }).showToast();
+function updatePaletteName(palette, newName) {
+  palette.name = newName;
+  showToast("Palette name has been updated!");
   saveInLocalStorage("savedPalettes", savedPalettes);
   saveInLocalStorage("currentPaletteName", currentPaletteName);
 }
 
-function savedPaletteExists(paletteObject) {
-  var matchingSavedPalette = savedPalettes.find((savedPalette) => {
-    return (
+function findMatchingPalette(palette) {
+  return savedPalettes.find(
+    (savedPalette) =>
       JSON.stringify(savedPalette.hexColors) ===
-      JSON.stringify(paletteObject.hexColors)
-    );
-  });
-
-  return matchingSavedPalette;
+      JSON.stringify(palette.hexColors)
+  );
 }
 
-function renderFilteredPalettes(filteredPalettes) {
-  const savedPalettesContainer = document.querySelector(".saved-palettes");
-  savedPalettesContainer.innerHTML = "";
+function renderSavedPalettes(palettes) {
+  const container = document.querySelector(".saved-palettes");
+  container.innerHTML = "";
 
-  if (filteredPalettes.length === 0) {
-    savedPalettesContainer.innerHTML = `<p id="no-found-palettes">No palettes found.</p>`;
+  if (palettes.length === 0) {
+    container.innerHTML = `<p id="no-found-palettes">No palettes found.</p>`;
     return;
   }
 
-  filteredPalettes.forEach((palette) => {
-    const paletteContainer = createPaletteContainerDOM(palette);
-    savedPalettesContainer.appendChild(paletteContainer);
+  palettes.forEach((palette) => {
+    const paletteContainer = createPaletteContainerHTML(palette);
+    container.appendChild(paletteContainer);
   });
 }
 
-function createPaletteContainerDOM(palette) {
+function createPaletteContainerHTML(palette) {
   const paletteContainer = document.createElement("div");
   paletteContainer.className = "palette-container";
 
@@ -253,7 +192,7 @@ function createPaletteContainerDOM(palette) {
     paletteContainer.appendChild(paletteInfoTooltip);
   }
 
-  const savedPalette = createSavedPaletteDOM(palette);
+  const savedPalette = createSavedPaletteHTML(palette);
   paletteContainer.appendChild(savedPalette);
 
   const deleteButton = createDeleteButton(palette.id);
@@ -262,13 +201,13 @@ function createPaletteContainerDOM(palette) {
   return paletteContainer;
 }
 
-function createSavedPaletteDOM(palette) {
+function createSavedPaletteHTML(palette) {
   const savedPalette = document.createElement("div");
   savedPalette.className = "saved-palette";
   savedPalette.id = `saved-palette-${palette.id}`;
 
   palette.hexColors.forEach((hexColor, index) => {
-    const colorBox = createColorBoxDOM(hexColor, index);
+    const colorBox = createColorBoxHTML(hexColor, index);
     savedPalette.appendChild(colorBox);
   });
 
@@ -280,7 +219,7 @@ function createSavedPaletteDOM(palette) {
   return savedPalette;
 }
 
-function createColorBoxDOM(hexColor, index) {
+function createColorBoxHTML(hexColor, index) {
   const colorBox = document.createElement("div");
   colorBox.className = "saved-color";
   colorBox.id = `saved-color-${index}`;
@@ -306,9 +245,7 @@ function deletePalette(id) {
       saveInLocalStorage("savedPalettes", savedPalettes);
       renderSavedPalettes(savedPalettes);
     },
-    () => {
-      return;
-    }
+    () => {}
   );
 }
 
@@ -331,13 +268,13 @@ function createPaletteTooltip(savedPalette) {
   return paletteInfoTooltip;
 }
 
-function renderPaletteInMainView(savedPaletteId) {
-  var paletteObject = findSavedPaletteByID(savedPaletteId);
-  currentPaletteName = paletteObject.name;
+function renderPaletteInMainView(paletteId) {
+  var palette = findSavedPaletteByID(paletteId);
+
+  currentPaletteName = palette.name;
   saveInLocalStorage("currentPaletteName", currentPaletteName);
 
-  const colorsArray = paletteObject.hexColors;
-  colorsArray.forEach((hexColor, index) => {
+  palette.hexColors.forEach((hexColor, index) => {
     var newCurrentColor = currentColors.find((currentColor) => {
       return index === currentColor.id;
     });
@@ -350,42 +287,19 @@ function renderPaletteInMainView(savedPaletteId) {
 }
 
 function findSavedPaletteByID(HTMLementID) {
-  var savedPalette = savedPalettes.find((savedPalette) => {
-    return savedPalette.id === HTMLementID;
-  });
-  return savedPalette;
+  return savedPalettes.find((savedPalette) => savedPalette.id === HTMLementID);
 }
 
-function extractColorID(HTMLelement) {
-  const elementID = HTMLelement.id;
-  const match = elementID.match(/-(\d+)$/);
-  if (match) {
-    return parseInt(match[1], 10);
-  } else {
-    throw new Error("Invalid format");
-  }
+function extractColorID(element) {
+  const match = element.id.match(/-(\d+)$/);
+  return match ? parseInt(match[1], 10) : null;
 }
 
 function searchPalettesByName(searchTerm) {
-  const filteredPalettes = savedPalettes.filter((savedPalette) =>
-    savedPalette.name.toLowerCase().includes(searchTerm)
+  const filteredPalettes = savedPalettes.filter((palette) =>
+    palette.name.toLowerCase().includes(searchTerm)
   );
   renderSavedPalettes(filteredPalettes);
-}
-
-function renderSavedPalettes(filteredPalettes) {
-  const savedPalettesContainer = document.querySelector(".saved-palettes");
-  savedPalettesContainer.innerHTML = "";
-
-  if (filteredPalettes.length === 0) {
-    savedPalettesContainer.innerHTML = `<p id="no-found-palettes">No palettes found.</p>`;
-    return;
-  }
-
-  filteredPalettes.forEach((palette) => {
-    const paletteContainer = createPaletteContainerDOM(palette);
-    savedPalettesContainer.appendChild(paletteContainer);
-  });
 }
 
 function showConfirmationToast(message, onConfirm, onCancel) {
@@ -420,38 +334,23 @@ function showConfirmationToast(message, onConfirm, onCancel) {
 }
 
 function saveInLocalStorage(itemName, data) {
-  const dataToJSON = JSON.stringify(data);
-  window.localStorage.setItem(itemName, dataToJSON);
+  localStorage.setItem(itemName, JSON.stringify(data));
 }
 
 function retrieveLocalStorage(itemName) {
-  try {
-    const item = window.localStorage.getItem(itemName);
-    if (!item) {
-      console.warn(`No local storage item found with the name: ${itemName}`);
-      return;
+  const data = localStorage.getItem(itemName);
+  if (data) {
+    switch (itemName) {
+      case "currentColors":
+        currentColors = JSON.parse(data);
+        break;
+      case "savedPalettes":
+        savedPalettes = JSON.parse(data);
+        break;
+      case "currentPaletteName":
+        currentPaletteName = JSON.parse(data);
+        break;
     }
-
-    const parsedData = JSON.parse(item);
-
-    if (parsedData) {
-      switch (itemName) {
-        case "currentColors":
-          currentColors = parsedData;
-          break;
-        case "savedPalettes":
-          savedPalettes = parsedData;
-          break;
-        case "currentPaletteName":
-          currentPaletteName = parsedData;
-          break;
-        default:
-          console.warn(`Unknown local storage item name: ${itemName}`);
-          break;
-      }
-    }
-  } catch (error) {
-    console.error(`Error retrieving local storage item: ${itemName}`, error);
   }
 }
 
@@ -463,4 +362,16 @@ function showLoading() {
 function hideLoading() {
   document.getElementById("loadingIcon").classList.add("hidden");
   document.getElementById("content").classList.remove("hidden");
+}
+
+function showToast(message) {
+  Toastify({
+    text: message,
+    duration: 3000,
+    close: true,
+    gravity: "top",
+    position: "right",
+    backgroundColor: "#333",
+    stopOnFocus: true,
+  }).showToast();
 }
